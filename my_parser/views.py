@@ -49,10 +49,10 @@ class DiskUrlViewSet(viewsets.ViewSet):
         else:
             image_size = (int(width), int(height))
 
-        print(image_size)
         if serializer.is_valid():
             url = serializer.validated_data["url"]
             name = serializer.validated_data["name"]
+
             if name:
                 name_file = name + '.tif'
             else:

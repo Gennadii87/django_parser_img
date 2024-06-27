@@ -21,10 +21,18 @@ class DiskUrlSerializer(serializers.Serializer, metaclass=serializers.Serializer
     width = serializers.IntegerField(
         help_text="Ширина",
         required=False,
-        validators=[MinValueValidator(10), MaxValueValidator(800)],
+        default=500,
+        validators=[MinValueValidator(10), MaxValueValidator(1000)],
     )
     height = serializers.IntegerField(
         help_text="Высота",
         required=False,
-        validators=[MinValueValidator(10), MaxValueValidator(800)],
+        default=500,
+        validators=[MinValueValidator(10), MaxValueValidator(1000)],
+    )
+    margin = serializers.IntegerField(
+        help_text="Отступ",
+        required=False,
+        default=100,
+        validators=[MinValueValidator(1), MaxValueValidator(200)],
     )
