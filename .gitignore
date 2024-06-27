@@ -1,0 +1,5 @@
+.idea/*
+download/*
+venv/*
+*.tif
+db.sqlite3
