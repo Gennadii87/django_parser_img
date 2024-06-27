@@ -1,5 +1,7 @@
 import datetime
 import os
+import shutil
+
 from django.conf import settings
 from rest_framework import viewsets
 from PIL import Image
@@ -9,25 +11,27 @@ from .serializers import FileSerializer, DiskUrlSerializer
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import status
+
+
 @extend_schema(tags=["File"])
 class FileViewSet(viewsets.ModelViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
-    def list(self, request, *args, **kwargs):
-        pass
-
-    def retrieve(self, request, *args, **kwargs):
-        pass
-
-    def create(self, request, *args, **kwargs):
-        pass
-
-    def partial_update(self, request, *args, **kwargs):
-        pass
-
-    def destroy(self, request, *args, **kwargs):
-        pass
+    # def list(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def retrieve(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def create(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def partial_update(self, request, *args, **kwargs):
+    #     pass
+    #
+    # def destroy(self, request, *args, **kwargs):
+    #     pass
 
 
 @extend_schema(tags=["Parser"])
@@ -36,6 +40,16 @@ class DiskUrlViewSet(viewsets.ViewSet):
 
     def create(self, request):
         serializer = self.serializer_class(data=request.data, partial=True)
+
+        width = serializer.initial_data.get("width")
+        height = serializer.initial_data.get("height")
+
+        if not width or not height:
+            image_size = None
+        else:
+            image_size = (int(width), int(height))
+
+        print(image_size)
         if serializer.is_valid():
             url = serializer.validated_data["url"]
             name = serializer.validated_data["name"]
@@ -48,17 +62,27 @@ class DiskUrlViewSet(viewsets.ViewSet):
             try:
                 direct_link = get_direct_link(url)
                 extract_to = "download"
+
                 download_and_extract(direct_link, extract_to)
                 image_paths = get_images(extract_to)
 
                 images = [Image.open(img_path) for img_path in image_paths]
-                create_collage(images, name_file)
-                print(f"TIFF file created successfully: {name_file}")
+                result = create_collage(images, name_file, image_size)
+
+                shutil.rmtree("download")
+
+                file_model = File(
+                    name=name_file,
+                    file=result
+                )
+                file_model.save()
+
+                file_url = request.build_absolute_uri(file_model.file.url)
 
                 return Response({
 
-                    'message': 'TIFF file created successfully',
-                    'file_name': name_file
+                    "message": "TIFF file created successfully",
+                    "file": file_url
                     },
 
                     status=status.HTTP_201_CREATED
