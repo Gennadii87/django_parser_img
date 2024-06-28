@@ -18,12 +18,12 @@ class FileViewSet(viewsets.ViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
-    def list(self, request):
+    def list(self, request, *args, **kwargs):
         model = self.queryset.all()
         result = self.serializer_class(model, many=True, context={'request': request})
         return Response(result.data, status=status.HTTP_200_OK)
 
-    def retrieve(self, request, **kwargs):
+    def retrieve(self, request, *args, **kwargs):
         file_id = kwargs.get("pk")
         try:
             model = self.queryset.filter(id=file_id)
@@ -35,22 +35,35 @@ class FileViewSet(viewsets.ViewSet):
                 return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    #
-    # def create(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def partial_update(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def destroy(self, request, *args, **kwargs):
-    #     pass
+
+    def destroy(self, request, *args, **kwargs):
+        file_id = kwargs.get("pk")
+        try:
+            models = self.queryset.filter(id=file_id)
+
+            if models:
+                model = models.first()
+                file_name = model.name
+                model.delete()
+
+                return Response({
+                    "id": file_id,
+                    "name": file_name,
+                    "message": "object is delete"
+                },
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @extend_schema(tags=["Parser"])
 class DiskUrlViewSet(viewsets.ViewSet):
     serializer_class = DiskUrlSerializer
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data, partial=True)
 
         width = serializer.initial_data.get("width")
