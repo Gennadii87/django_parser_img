@@ -67,7 +67,7 @@ def create_collage(images, output_file, image_size=None, margin=None, img_row=No
 
         collage_image.paste(img, (paste_x, paste_y))
 
-    save_kwargs = {"compression": "jpeg"}  # Устанавливаем компрессию изображений
+    save_kwargs = {"compression": "jpeg"}
 
     output_file_path = os.path.join(settings.MEDIA_ROOT, "image", output_file)
     os.makedirs(os.path.dirname(output_file_path), exist_ok=True)
