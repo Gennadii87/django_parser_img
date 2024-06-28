@@ -35,15 +35,6 @@ class FileViewSet(viewsets.ViewSet):
                 return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    #
-    # def create(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def partial_update(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def destroy(self, request, *args, **kwargs):
-    #     pass
 
 
 @extend_schema(tags=["Parser"])
