@@ -32,7 +32,7 @@ def get_images(directory):
     return images
 
 
-def create_collage(images, output_file, image_size=None, margin=None):
+def create_collage(images, output_file, image_size=None, margin=None, img_row=None):
     """Создаем коллаж"""
     if not images:
         raise ValueError("No images found.")
@@ -46,7 +46,7 @@ def create_collage(images, output_file, image_size=None, margin=None):
     image_width = max(img.width for img in resized_images)
     image_height = max(img.height for img in resized_images)
 
-    images_per_row = 7  # количество изображений в ряду
+    images_per_row = img_row  # количество изображений в ряду
 
     total_width = images_per_row * (image_width + margin) + margin
     collage_height = math.ceil(len(resized_images) / images_per_row) * (image_height + margin) + margin

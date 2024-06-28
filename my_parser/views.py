@@ -1,28 +1,40 @@
 import datetime
-import os
 import shutil
-
-from django.conf import settings
-from rest_framework import viewsets
 from PIL import Image
+
 from parser_img.parser_img import download_and_extract, get_images, create_collage, get_direct_link
 from .models import File
 from .serializers import FileSerializer, DiskUrlSerializer
-from drf_spectacular.utils import extend_schema
+
+from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 
+from drf_spectacular.utils import extend_schema
+
 
 @extend_schema(tags=["File"])
-class FileViewSet(viewsets.ModelViewSet):
+class FileViewSet(viewsets.ViewSet):
     queryset = File.objects.all()
     serializer_class = FileSerializer
 
-    # def list(self, request, *args, **kwargs):
-    #     pass
-    #
-    # def retrieve(self, request, *args, **kwargs):
-    #     pass
+    def list(self, request):
+        model = self.queryset.all()
+        result = self.serializer_class(model, many=True, context={'request': request})
+        return Response(result.data, status=status.HTTP_200_OK)
+
+    def retrieve(self, request, **kwargs):
+        file_id = kwargs.get("pk")
+        try:
+            model = self.queryset.filter(id=file_id)
+            if model:
+                result = self.serializer_class(model.first(), context={'request': request})
+
+                return Response(result.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     #
     # def create(self, request, *args, **kwargs):
     #     pass
@@ -43,6 +55,8 @@ class DiskUrlViewSet(viewsets.ViewSet):
 
         width = serializer.initial_data.get("width")
         height = serializer.initial_data.get("height")
+        margin = int(serializer.initial_data.get("margin") or 1)
+        img_row = int(serializer.initial_data.get("img_row") or 1)
 
         if not width or not height:
             image_size = None
@@ -67,7 +81,7 @@ class DiskUrlViewSet(viewsets.ViewSet):
                 image_paths = get_images(extract_to)
 
                 images = [Image.open(img_path) for img_path in image_paths]
-                result = create_collage(images, name_file, image_size)
+                result = create_collage(images, name_file, image_size, margin, img_row)
 
                 shutil.rmtree("download")
 
@@ -83,7 +97,7 @@ class DiskUrlViewSet(viewsets.ViewSet):
 
                     "message": "TIFF file created successfully",
                     "file": file_url
-                    },
+                },
 
                     status=status.HTTP_201_CREATED
                 )

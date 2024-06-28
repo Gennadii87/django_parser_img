@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import FileViewSet, DiskUrlViewSet
 
 router = DefaultRouter()
-router.register(r"file",  FileViewSet)
+router.register(r"file",  FileViewSet, basename="file")
 router.register(
     r"url-disk",
     DiskUrlViewSet,

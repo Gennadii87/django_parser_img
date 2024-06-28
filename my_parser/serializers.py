@@ -36,3 +36,9 @@ class DiskUrlSerializer(serializers.Serializer, metaclass=serializers.Serializer
         default=100,
         validators=[MinValueValidator(1), MaxValueValidator(200)],
     )
+    img_row = serializers.IntegerField(
+        help_text="Количество изображений в ряду",
+        required=False,
+        default=7,
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    )
